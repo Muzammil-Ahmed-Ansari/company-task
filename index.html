@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Electroscope Induction Simulation</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #fdfeff;
+      font-family: Arial, sans-serif;
+    }
+
+    .fullscreen-wrapper {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      height: 400px;
+      background: hsl(180, 100%, 99%);
+      border-radius: 8px;
+      overflow: visible;
+    }
+
+    .bottle {
+      position: absolute;
+      bottom: 0;
+      left: 35%;
+      width: 30%;
+      height: 260px;
+      border: 4px solid #6ea0d7;
+      border-radius: 45px 45px 30px 30px;
+      background: rgba(110, 160, 215, 0.12);
+    }
+
+    .neck {
+      position: absolute;
+      top: -32px;
+      left: 47%;
+      width: 12%;
+      height: 30px;
+      border: 4px solid white;
+      border-bottom: none;
+      border-radius: 18px 18px 0 0;
+      background: white;
+    }
+
+    .rod {
+      position: absolute;
+      top: -30px;
+      left: 48%;
+      width: 16px;
+      height: 295px;
+      background: #888;
+      border-radius: 3px;
+      z-index: 4;
+    }
+
+    .plate {
+      position: absolute;
+      top: -53px;
+      left: 40%;
+      width: 20%;
+      height: 28px;
+      background: #444;
+      border-radius: 50% / 60%;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 6;
+    }
+
+    .plate-charge {
+      position: relative;  /* <-- IMPORTANT */
+      width: 100%;
+      height: 20px;
+    }
+
+    .charge-dot {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 14px;
+      line-height: 16px;
+      text-align: center;
+      color: white;
+      user-select: none;
+      transition: 0.6s;
+    }
+
+    .positive {
+      background: #d94343;
+      box-shadow: 0 0 8px #ff4d4d;
+    }
+
+    .negative {
+      background: #2f8fff;
+      box-shadow: 0 0 10px #55b7ff;
+    }
+
+    .leaf {
+      position: absolute;
+      top: 190px;
+      width: 23px;
+      height: 130px;
+      background: gold;
+      border: 2px solid #b68700;
+      border-radius: 12px;
+      box-shadow: inset 1px 5px 9px #c19d15;
+      transform-origin: top center;
+      transition: transform 1s ease;
+      z-index: 3;
+    }
+
+    .leaf.left {
+      left: 39%;
+      transform: rotate(7deg);
+    }
+
+    .leaf.right {
+      left: 48%;
+      transform: rotate(-7deg);
+    }
+
+    .leaf .charge-dot {
+      width: 18px;
+      height: 18px;
+      font-size: 16px;
+      line-height: 18px;
+      top: 40px;
+      left: 3px;
+      position: absolute;
+    }
+
+    .leaf.right .charge-dot {
+      left: 4px;
+    }
+
+    .charged-rod {
+      position: absolute;
+      top: 90px;
+      left: 0;
+      width: 140px;
+      height: 40px;
+      border-radius: 18px;
+      border: 2.8px solid #999;
+      background: linear-gradient(135deg, #c7c7c7, #999);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 16px;
+      transition: left 1s;
+      z-index: 7;
+    }
+
+    .charged-rod.positive {
+      border-color: #c62828;
+      background: linear-gradient(135deg, #ff7f7f, #c62828);
+    }
+
+    .charged-rod.negative {
+      border-color: #1565c0;
+      background: linear-gradient(135deg, #5ca0ff, #1565c0);
+    }
+
+    .rod-charge {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 18px;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      filter: drop-shadow(0 0 3px black);
+      transition: background-color 0.5s;
+    }
+
+    .rod-charge.positive {
+      background: #c62828;
+      box-shadow: 0 0 10px #ff8080;
+    }
+
+    .rod-charge.negative {
+      background: #1565c0;
+      box-shadow: 0 0 12px #6eb1ff;
+    }
+
+    .controls {
+      margin-top: 22px;
+      font-size: 18px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    label {
+      cursor: pointer;
+    }
+
+    button {
+      padding: 8px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      background: #eee;
+      border: 1.5px solid #555;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #ddd;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        height: 350px;
+      }
+
+      .charged-rod {
+        top: 60px;
+        width: 120px;
+      }
+
+      .leaf {
+        height: 100px;
+      }
+
+      .controls {
+        font-size: 16px;
+      }
+
+      button {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="fullscreen-wrapper">
+    <div class="container">
+      <div id="chargedRod" class="charged-rod positive">
+        <div class="rod-charge positive">+</div>
+        <div class="rod-charge positive">+</div>
+        <div class="rod-charge positive">+</div>
+        <div class="rod-charge positive">+</div>
+                <div class="rod-charge positive">+</div>
+                 <div class="rod-charge positive">-</div>
+        <div class="rod-charge positive">-</div>
+        <div class="rod-charge positive">-</div>
+        <div class="rod-charge positive">-</div>
+      </div>
+      <div class="bottle"></div>
+      <div class="neck"></div>
+      <div class="rod"></div>
+      <div class="plate"><div class="plate-charge"></div></div>
+      <div class="leaf left"><div class="charge-dot positive">-</div></div>
+      <div class="leaf right"><div class="charge-dot positive">-</div></div>
+         <div class="leaf left"><div class="charge-dot positive">+</div></div>
+      <div class="leaf right"><div class="charge-dot positive">+</div></div>
+      
+    </div>
+    <div class="controls">
+      <label><input type="radio" name="chargeType" value="positive" checked /> Charged with (+)</label>
+      <label><input type="radio" name="chargeType" value="negative" /> Charged with (–)</label>
+      <button id="approachBtn">Approach Charged Rod</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    const rod = document.getElementById("chargedRod");
+    const leafL = document.querySelector(".leaf.left");
+    const leafR = document.querySelector(".leaf.right");
+    const plate = document.querySelector(".plate-charge");
+    const approach = document.getElementById("approachBtn");
+    const reset = document.getElementById("resetBtn");
+    const radios = document.querySelectorAll('input[name="chargeType"]');
+    let isClose = false,
+        chargeType = "positive";
+
+    const posList = [
+      { top: 2, left: 5 },
+      { top: 2, left: 25 },
+      { top: 2, left: 45 },
+      { top: 2, left: 65 },
+      { top: 2, left: 85 }
+    ];
+
+    function updateRod(type) {
+      rod.className = "charged-rod " + type;
+      rod.innerHTML = Array(4)
+        .fill()
+        .map(() => `<div class="rod-charge ${type}">${type === "positive" ? "+" : "−"}</div>`)
+        .join("");
+    }
+
+    function updatePlate() {
+      plate.innerHTML = "";
+      // Show the SAME charges on plate as rod charge
+      const sameCharge = chargeType;  
+      posList.forEach((p) => {
+        let d = document.createElement("div");
+        d.className = "charge-dot " + sameCharge;
+        d.style.top = p.top + "px";
+        d.style.left = p.left + "%";
+        d.textContent = sameCharge === "positive" ? "+" : "−";
+        plate.appendChild(d);
+      });
+    }
+
+    function openLeaves() {
+      const angle = chargeType === "positive" ? 25 : 35;
+      leafL.style.transform = `rotate(${angle}deg)`;
+      leafR.style.transform = `rotate(${-angle}deg)`;
+      document.querySelectorAll(".leaf .charge-dot").forEach((d) => {
+        d.className = "charge-dot " + chargeType;
+        d.textContent = chargeType === "positive" ? "+" : "−";
+      });
+    }
+
+    function closeLeaves() {
+      leafL.style.transform = "rotate(7deg)";
+      leafR.style.transform = "rotate(-7deg)";
+    }
+
+    function handle() {
+      if (!isClose) {
+        rod.style.left = "45%";
+        updatePlate();
+        openLeaves();
+        approach.textContent = "Withdraw Charged Rod";
+      } else {
+        rod.style.left = "0";
+        plate.innerHTML = "";
+        closeLeaves();
+        approach.textContent = "Approach Charged Rod";
+      }
+      isClose = !isClose;
+    }
+
+    radios.forEach((r) =>
+      r.addEventListener("change", (e) => {
+        chargeType = e.target.value;
+        updateRod(chargeType);
+        if (isClose) {
+          updatePlate();
+          openLeaves();
+        }
+      })
+    );
+
+    approach.addEventListener("click", handle);
+    reset.addEventListener("click", () => {
+      if (isClose) handle();
+      chargeType = "positive";
+      radios[0].checked = true;
+      updateRod(chargeType);
+      plate.innerHTML = "";
+      closeLeaves();
+    });
+
+    updateRod(chargeType);
+    closeLeaves();
+  </script>
+</body>
+</html>
+
+
